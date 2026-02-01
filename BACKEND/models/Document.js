@@ -60,10 +60,11 @@ const documentSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 documentSchema.index({ userId: 1, createdAt: -1 }); // FIX
 
-const Document = mongoose.model("Document", documentSchema); // FIX
+const Document =
+  mongoose.models.Document || mongoose.model("Document", documentSchema);
 export default Document;

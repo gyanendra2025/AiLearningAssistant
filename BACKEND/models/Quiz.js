@@ -81,10 +81,10 @@ const quizSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 quizSchema.index({ userId: 1, documentId: 1 });
 
-const Quiz = mongoose.model("Quiz", quizSchema); // FIX
+const Quiz = mongoose.models.Quiz || mongoose.model("Quiz", quizSchema); // FIX
 export default Quiz;

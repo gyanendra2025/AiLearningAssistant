@@ -30,7 +30,7 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response === 500) {
+    if (error.response?.status === 500) {
       console.error("Internal server error, Please try again later");
     } else if (error.code === "ECONNABORTED") {
       console.error("Request timeout, Please try again later");

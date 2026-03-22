@@ -5,7 +5,6 @@ const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 80000,
   headers: {
-    "Content-Type": "application/json",
     Accept: "application/json",
   },
 });
@@ -16,6 +15,10 @@ axiosInstance.interceptors.request.use(
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    // Only set Content-Type to JSON for non-FormData requests
+    if (!(config.data instanceof FormData)) {
+      config.headers["Content-Type"] = "application/json";
     }
     return config;
   },

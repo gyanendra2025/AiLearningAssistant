@@ -1,8 +1,11 @@
 import Document from "../models/Document.js";
 import Flashcard from "../models/Flashcard.js";
 import Quiz from "../models/Quiz.js";
-import { extractTextFromPDF } from "../utils/pdfParser.js";
+import { extractTextFromFile } from "../utils/fileParser.js";
 import { chunkText } from "../utils/textChunker.js";
+import { generateEmbedding } from "../utils/embeddingService.js";
+import ApiKey from "../models/ApiKey.js";
+import { decrypt } from "../utils/encryption.js";
 
 import fs from "fs/promises";
 import mongoose from "mongoose";
@@ -42,9 +45,9 @@ export const uploadDocument = async (req, res, next) => {
       status: "processing",
     });
 
-    // Process PDF in background (non-blocking)
-    processPDF(document._id, req.file.path).catch((err) => {
-      console.error("PDF processing error:", err);
+    // Process document in background (non-blocking)
+    processDocument(document._id, req.file.path, req.file.originalname).catch((err) => {
+      console.error("Document processing error:", err);
     });
 
     return res.status(201).json({
@@ -61,21 +64,50 @@ export const uploadDocument = async (req, res, next) => {
   }
 };
 
-// helper function processPDF
-const processPDF = async (documentId, filePath) => {
+// helper function to process any supported file type
+const processDocument = async (documentId, filePath, originalName) => {
   try {
-    const { text } = await extractTextFromPDF(filePath);
+    const { text } = await extractTextFromFile(filePath, originalName);
 
     const chunks = chunkText(text, 500, 50);
+
+    // Try to generate embeddings for each chunk
+    try {
+      const doc = await Document.findById(documentId);
+      let apiKey = process.env.GEMINI_API_KEY;
+      let provider = "gemini";
+
+      // Try to get user's API key
+      if (doc?.userId) {
+        const userKey = await ApiKey.findOne({ userId: doc.userId, isActive: true });
+        if (userKey) {
+          apiKey = decrypt(userKey.encryptedKey);
+          provider = userKey.provider;
+        }
+      }
+
+      if (apiKey) {
+        for (const chunk of chunks) {
+          try {
+            chunk.embedding = await generateEmbedding(chunk.content, provider, apiKey);
+          } catch (embErr) {
+            console.warn(`Embedding failed for chunk ${chunk.chunkIndex}:`, embErr.message);
+            chunk.embedding = [];
+          }
+        }
+      }
+    } catch (embError) {
+      console.warn("Embedding generation skipped:", embError.message);
+    }
 
     await Document.findByIdAndUpdate(documentId, {
       extractedText: text,
       chunks: chunks,
       status: "ready",
     });
-    console.log(`Document ${documentId} processed succesfully`);
+    console.log(`Document ${documentId} processed successfully`);
   } catch (err) {
-    console.error(`Error processsing document ${documentId}:`, err);
+    console.error(`Error processing document ${documentId}:`, err);
     await Document.findByIdAndUpdate(documentId, {
       status: "failed",
     });
@@ -150,7 +182,7 @@ export const getDocument = async (req, res, next) => {
       documentId: document._id,
       userId: req.user._id,
     });
-    document.lastAccessedAt = Date.now();
+    document.lastAccessed = Date.now();
     await document.save();
 
     const documentDate = document.toObject();

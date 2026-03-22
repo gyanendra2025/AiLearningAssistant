@@ -1,24 +1,21 @@
 import { readFile } from "node:fs/promises";
-import { createRequire } from "node:module";
+import { PDFParse } from "pdf-parse";
 
-const require = createRequire(import.meta.url);
-const pdfParseModule = require("pdf-parse");
-const pdfParse = pdfParseModule.default || pdfParseModule;
 /**
- * extract text from pdf file
- * @param {string} filepath- path to pdf file
- * @return {Promise<{text:string, numPages:number}>}
+ * Extract text from PDF file
+ * @param {string} filepath - path to pdf file
+ * @return {Promise<{text: string, numPages: number}>}
  */
-
 export const extractTextFromPDF = async (filepath) => {
   try {
-    const dataBuffer = await readFile(filepath);
-    const data = await pdfParse(dataBuffer);
+    const parser = new PDFParse({ url: filepath });
+    await parser.load();
+    const text = await parser.getText();
 
     return {
-      text: data.text,
-      numPages: data.numpages,
-      info: data.info,
+      text: text || "",
+      numPages: parser.doc?.numPages || 0,
+      info: {},
     };
   } catch (err) {
     console.error("PDF Parsing error:", err);

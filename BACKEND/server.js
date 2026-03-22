@@ -15,6 +15,11 @@ import flashcardRoutes from "./routes/flashcardRoute.js";
 import aiRoutes from "./routes/aiRoute.js";
 import quizRoutes from "./routes/quizRoute.js";
 import progressRoutes from "./routes/progressRoutes.js";
+import settingsRoutes from "./routes/settingsRoute.js";
+import analyticsRoutes from "./routes/analyticsRoute.js";
+import exportRoutes from "./routes/exportRoute.js";
+import studySessionRoutes from "./routes/studySessionRoute.js";
+import groupRoutes from "./routes/groupRoute.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,9 +30,14 @@ connectDB();
 
 app.use(
   cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["content-type", "Authorization"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:5174",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
 );
@@ -45,16 +55,21 @@ app.use("/api/flashcard", flashcardRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/quiz", quizRoutes);
 app.use("/api/progress", progressRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/export", exportRoutes);
+app.use("/api/study-session", studySessionRoutes);
+app.use("/api/groups", groupRoutes);
 
-app.use(errorHandler);
-
-app.use((req, res) => {
+app.use((req, res, next) => {
   res.status(404).json({
-    success: "false",
+    success: false,
     error: "Route not found",
     statusCode: 404,
   });
 });
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;
 

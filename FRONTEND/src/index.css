@@ -2,17 +2,24 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme{
     --font-display:"urbanism",sans-serif;
     --breakpoint-3xl:1920px;
     --color-primary:#FF9324;
 }
 
-@layer{
+@layer base{
     html{
         font-family:var(--font-display);
     }
     body{
-        background: #fcfbfc;
+        background: #f8f9ff;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .dark body{
+        background: #0f1117;
+        color: #e5e7eb;
     }
 }

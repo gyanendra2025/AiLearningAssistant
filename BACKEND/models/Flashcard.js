@@ -39,6 +39,23 @@ const flashcardSchema = new mongoose.Schema(
           type: Boolean,
           default: false,
         },
+        // SM-2 Spaced Repetition fields
+        easeFactor: {
+          type: Number,
+          default: 2.5,
+        },
+        interval: {
+          type: Number, // days until next review
+          default: 0,
+        },
+        nextReviewDate: {
+          type: Date,
+          default: Date.now,
+        },
+        consecutiveCorrect: {
+          type: Number,
+          default: 0,
+        },
       },
     ],
   },

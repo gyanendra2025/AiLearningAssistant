@@ -1,10 +1,13 @@
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPath";
 
-const uploadDocument = async (file) => {
+const uploadDocument = async (file, title) => {
   try {
     const formData = new FormData();
     formData.append("file", file);
+    if (title) {
+      formData.append("title", title);
+    }
     const response = await axiosInstance.post(
       API_PATHS.DOCUMENT.UPLOAD,
       formData,

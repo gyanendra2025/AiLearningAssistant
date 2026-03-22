@@ -45,4 +45,13 @@ export const API_PATHS = {
   PROGRESS: {
     GET_DASHBOARD: "/progress/dashboard",
   },
+
+  SETTINGS: {
+    SAVE_API_KEY: "/settings/api-key",
+    GET_API_KEYS: "/settings/api-keys",
+    DELETE_API_KEY: (id) => `/settings/api-key/${id}`,
+    ACTIVATE_API_KEY: (id) => `/settings/api-key/${id}/activate`,
+    GET_USAGE: "/settings/usage",
+    GET_USAGE_SUMMARY: "/settings/usage/summary",
+  },
 };

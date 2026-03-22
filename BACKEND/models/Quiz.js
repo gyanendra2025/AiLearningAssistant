@@ -24,7 +24,7 @@ const quizSchema = new mongoose.Schema(
           required: true,
         },
         options: {
-          type: [String], // FIX
+          type: [String],
           required: true,
           validate: [
             (array) => array.length === 4,
@@ -36,48 +36,48 @@ const quizSchema = new mongoose.Schema(
           required: true,
         },
         explanation: {
-          type: String, // FIX
+          type: String,
           default: "",
         },
         difficulty: {
-          type: String, // FIX
+          type: String,
           enum: ["easy", "medium", "hard"],
           default: "medium",
         },
-        userAnswer: [
-          {
-            questionIndex: {
-              type: Number,
-              required: true,
-            },
-            selectedAnswer: {
-              type: String,
-              required: true,
-            },
-            isCorrect: {
-              type: Boolean,
-              required: true,
-            },
-            answerAt: {
-              type: Date,
-              default: Date.now,
-            },
-          },
-        ],
-        score: {
+      },
+    ],
+    userAnswers: [
+      {
+        questionIndex: {
           type: Number,
-          default: 0,
+          required: true,
         },
-        totalQuestion: {
-          type: Number,
-          default: 0, // FIX (true ❌)
+        selectedAnswer: {
+          type: String,
+          required: true,
         },
-        completedAt: {
+        isCorrect: {
+          type: Boolean,
+          required: true,
+        },
+        answerAt: {
           type: Date,
-          default: null,
+          default: Date.now,
         },
       },
     ],
+    score: {
+      type: Number,
+      default: 0,
+    },
+    totalQuestions: {
+      type: Number,
+      default: 0,
+    },
+    completedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -86,5 +86,5 @@ const quizSchema = new mongoose.Schema(
 
 quizSchema.index({ userId: 1, documentId: 1 });
 
-const Quiz = mongoose.models.Quiz || mongoose.model("Quiz", quizSchema); // FIX
+const Quiz = mongoose.models.Quiz || mongoose.model("Quiz", quizSchema);
 export default Quiz;
